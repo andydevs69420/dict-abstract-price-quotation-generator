@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>table</title>
+    <!-- <link rel="stylesheet" href="table.css"> -->
+    <style>
+        body {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+    <dict-apqg id="container"></dict-apqg>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/printThis/1.15.0/printThis.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+    <script src="abstractPriceQuotationGenerator.js.js"></script>
+    <script>
+
+        var apqg = new AbstractPriceQuotationGenerator({
+            size        : PAPER_SIZE.A4,
+            orientation : PAPER_ORIENTATION.LANDSCAPE,
+        });
+
+        apqg.setPurpose("Lorem ipsum dolor, sit amet consectetur adipisicing elit. Rem, necessitatibus officiis quis quaerat deserunt officia dolores nostrum itaque fuga repellat.")
+        apqg.markAsSupplier(["SUPPLIER 0", "SUPPLIER 1", "SUPPLIER 2", "SUPPLIER 3", "SUPPLIER 4"])
+        apqg.setColumnHeader(["ITEM NO", "QTY", "UNIT", "ARTICLE / SERVICES", "SUPPLIER 0", "SUPPLIER 1", "SUPPLIER 2", "SUPPLIER 3", "SUPPLIER 4", "TOTAL"])
+
+
+
+        apqg.generatexxxx();
+        
+        /*
+      
+        */
+        
+        
+
+        
+    </script>
+
+</body>
+</html>
