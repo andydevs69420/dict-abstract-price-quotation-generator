@@ -188,6 +188,7 @@
                     "width"  : this.SIZE._w + "mm",
                     "height" : this.SIZE._h + "mm",
                     "background-color" : "#FFFFFF",
+                    "font-family" : "Calibri, sans-serif",
                 });
             
             if (this.ORIENTATION === PAPER_ORIENTATION.LANDSCAPE) {
@@ -205,18 +206,13 @@
          * @return HTMLElement
          * @example
          **/
-        make__Table(wrapper, header, hasPurpose=true) {
-
-            if (!wrapper instanceof HTMLElement)
-            throw new TypeError("wrapper must be an HTMLElement type!, got "+wrapper.constructor.name);
+        make__Table(header, hasPurpose=true) {
 
             if (!header.constructor.name === "Array")
             throw new TypeError("header must be an Array type!, got "+header.constructor.name);
 
             if (!hasPurpose.constructor.name === "Boolean")
             throw new TypeError("hasPurpose must be an Boolean type!, got "+hasPurpose.constructor.name);
-
-            let table_or_paper = [];
 
             let table = $el("table", {
                 style : {
@@ -367,10 +363,12 @@
                 row.forEach((td_val) => {
                     let td_as_column = $el("td", {
                         style  : {
-                            "padding"       : ".8em .2em",
+                            "padding"       : ".2em",
                             "text-align"    : "center",
+                            "font-weight"   : "bold",
                             "border-left"   : (iter_idx !== 0) ? "1px solid black" : "none",
                             "overflow-wrap" : "break-word",
+                            "font-size" : "14px",
                         },
                         attrib : {
                             "colspan" : this.COLSPANS[page_num_in_index][iter_idx]
@@ -516,8 +514,8 @@
 
                 let paper = this.make__Paper();
                     let wrapper = $el("div");
-                        let table = this.make__Table(wrapper, this.PAGE_HEAD[0], true);
-
+                        let table = this.make__Table(this.PAGE_HEAD[0], true);
+                    wrapper.appendChild(table);
                 paper.appendChild(wrapper);
                 PAPER__WRAPPER?.appendChild(paper);
 
@@ -530,7 +528,7 @@
 
                     let paper = this.make__Paper();
                         let wrapper = $el("div");
-                            let table = this.make__Table(wrapper, h, hasPurpose);
+                            let table = this.make__Table(h, hasPurpose);
                             this.append__Rows(table, idx);
                         wrapper.appendChild(table);
                     idx++;
@@ -557,7 +555,7 @@
                 x: 0,
                 y: 0,
                 callback: function (doc) {
-                    // doc.output("dataurlnewwindow");
+                    doc.output("dataurlnewwindow");
                     // doc.save("test.pdf");
                 }
             });
