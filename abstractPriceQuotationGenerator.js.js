@@ -2,7 +2,7 @@
     Abstract Price Quotation Generator
     | by andydevs69420
     | github: https://github.com/andydevs69420/dict-abstractPriceQuotationGenerator.git
-    | abstract price quotation generator is a simple tool that generates price quotations for DICT.
+    | Abstract price quotation generator is a simple tool that generates price quotations for DICT.
     | May 11 2022
     ;
 */
@@ -17,8 +17,8 @@
 
     // supported paper orientation
     window.PAPER_ORIENTATION = Object.freeze({
-        PORTRAIT  : 0,
-        LANDSCAPE : 1,
+        PORTRAIT  : "p",
+        LANDSCAPE : "l",
     });
 
     /**
@@ -32,6 +32,9 @@
         throw new TypeError("size must be an Object type!, got "+size.constructor.name);
         
         if ((size._w === null || size._w === undefined) && (size._h === null || size._h === undefined))
+        throw new TypeError("invalid size " + size);
+
+        if ((size._w.constructor.name !== "Number") && (size._h.constructor.name !== "Number"))
         throw new TypeError("invalid size " + size);
 
         return size;
@@ -157,21 +160,16 @@
             this.ORIENTATION = option.orientation;
 
             this.SUPPLIERS  = null;
+            this.PURPOSE    = null;
             this.PAGE_HEAD  = [];
 
-            this.PAPER      = null;
-            this.WRAPPER    = null;
-            this.TABLE      = null;
-            this.COL_HEADER = null;
-
-            this.make__doc();
         }
 
         /**
          * Setup the base paper/document
          * @return HTMLElement
          **/ 
-        setup__Paper() {
+        make__Paper() {
             let paper = $el("section");
                 paper = setStyle(paper, {
                     "display" : "flex",
@@ -198,8 +196,15 @@
          * @return HTMLElement
          * @example
          **/
-        setup__Table() {
-            this.TABLE = $el("table", {
+        make__Table(header, hasPurpose=true) {
+
+            if (!header.constructor.name === "Array")
+            throw new TypeError("header must be an Array type!, got "+header.constructor.name);
+
+            if (!hasPurpose.constructor.name === "Boolean")
+            throw new TypeError("hasPurpose must be an Boolean type!, got "+hasPurpose.constructor.name);
+
+            let table = $el("table", {
                 style : {
                     "width"  : "90%",
                     "margin" : "auto",
@@ -210,15 +215,15 @@
             });
 
                 // header
-                let thead = $el("thead");
+                let thead_0 = $el("thead");
 
-                    let tr = $el("tr", {
+                    let tr_purpose_group = $el("tr", {
                         style : {
                             "border-bottom" : "1px solid black"
                         }
                     });
                     
-                        let th = $el("th", {
+                        let th_purpose_label = $el("th", {
                             style : {
                                 "height" : "auto" ,
                                 "padding" : ".5em",
@@ -229,48 +234,87 @@
                             }
                         });
 
-                        th.innerText = "Purpose:";
+                        th_purpose_label.innerText = "Purpose:";
 
 
-                        let td = $el("td", {
+                        let td_purpose_slot = $el("td", {
                             style  : {
                                 "height" : "auto" ,
                                 "padding" : ".5em",
                                 "vertical-align" : "middle"
                             },
                             attrib : {
-                                "id" : this.PURPOSE_SLOT_ID,
                                 "colspan" : (this.NUMBER_OF_UNITS - 1)
                             }
                         });
 
-                    tr.appendChild(th);
-                    tr.appendChild(td);
+                        td_purpose_slot.innerText = this.PURPOSE;
 
-                thead.appendChild(tr);
-                    
-                this.COL_HEADER = $el("tr", {
-                    style : {
-                        "border-bottom" : "1px solid black",
-                    }
-                });
+                    tr_purpose_group.appendChild(th_purpose_label);
+                    tr_purpose_group.appendChild(td_purpose_slot);
+                
+                if (hasPurpose)
+                    thead_0.appendChild(tr_purpose_group);
+                
+                let thead_1 = $el("thead");
 
-            this.TABLE?.appendChild(thead);
-            this.TABLE?.appendChild(this.COL_HEADER);
+                    let tr_header_group = $el("tr", {
+                        style : {
+                            "border-bottom" : "1px solid black",
+                        }
+                    });
 
-            return this.TABLE;
-        }
+                    let max_idx = 0;
 
-        /**
-         * Make the document but never gnerate
-         * @return null
-         **/
-        make__doc() {
-            this.PAPER = this.setup__Paper();
-                this.WRAPPER = $el("div");
-                    this.TABLE = this.setup__Table();
-                this.WRAPPER?.appendChild(this.TABLE);
-            this.PAPER?.appendChild(this.WRAPPER);
+                    for (let iter_i = 0; iter_i < header.length; iter_i++)
+                        for (let iter_j = 0; iter_j < header.length; iter_j++)
+                            if (header[iter_j].length > header[max_idx].length)
+                                max_idx = iter_j;
+
+                    let iter_idx = 0;
+                    header.forEach((th_val) => {
+
+                        let th_as_column = $el("th", {
+                            style  : {
+                                "padding"       : ".8em .2em",
+                                "text-align"    : "center",
+                                "border-left"   : (iter_idx !== 0) ? "1px solid black" : "none",
+                                "overflow-wrap" : "break-word",
+                            },
+                            attrib : {
+                                "colspan" : (iter_idx !== max_idx)? (() => {
+                                    let colspan = this.NUMBER_OF_UNITS - (this.NUMBER_OF_UNITS) - (header.length - 1);
+
+                                    if (colspan <= 0)
+                                        return "1";
+
+                                    return colspan;
+                                })()
+                                : 
+                                (() => {
+                                    let colspan = (this.NUMBER_OF_UNITS) - (header.length - 1);
+
+                                    if (colspan <= 0)
+                                        return "1";
+
+                                    return colspan;
+                                })()
+                            }
+                        });
+
+                        th_as_column.innerText = th_val;
+
+                        tr_header_group.appendChild(th_as_column);
+
+                        iter_idx++;
+                    });
+                
+                thead_1.appendChild(tr_header_group);
+
+            table.appendChild(thead_0);
+            table.appendChild(thead_1);
+
+            return table;
         }
 
         // #=================================== SETTERS =================================
@@ -280,9 +324,7 @@
 
             if (string.constructor.name !== "String")
             throw new TypeError("string must be an String type!, got "+string.constructor.name);
-
-            this.PAPER.querySelector("#"+this.PURPOSE_SLOT_ID)
-            .innerText = string;
+            this.PURPOSE = string;
         }
 
         markAsSupplier(suppliers) {
@@ -302,9 +344,11 @@
             throw new TypeError("header must be an Array type!, got "+header.constructor.name);
 
             this.SUPPLIERS?.forEach((supplier) => {
-                if (!header.includes(supplier))
-                throw new Error("supplier "+supplier+ " is not found in the given column header!");
+                if (!header.map((e) => e[1]).includes(supplier))
+                throw new Error("supplier "+supplier+" is not found in the given column header!");
             });
+
+            let header_copy = header;
 
             while (this.COL_HEADER?.firstChild)
             this.COL_HEADER?.removeChild(this.COL_HEADER.firstChild);
@@ -312,74 +356,33 @@
             if (this.NUMBER_OF_UNITS < header.length)
                 while (this.SUPPLIERS.length > 0)
                     this.PAGE_HEAD.push(this.SUPPLIERS.splice(0, 3));
+
+            console.log(header_copy);
             
-                    
-            for (let x = 1; x < this.PAGE_HEAD.length; x++) {
-                this.PAGE_HEAD[x].forEach((col) => {
-                    let index = header.indexOf(col);
-                    console.log(header);
-                    header.splice(index,1);
-                });
-            }
-
-            let max_idx = 0;
-
-            for (let iter_i = 0; iter_i < header.length; iter_i++)
-                for (let iter_j = 0; iter_j < header.length; iter_j++)
-                    if (header[iter_j].length > header[max_idx].length)
-                        max_idx = iter_j;
-
-            console.log(header);
-
-            let iter_idx = 0;
-            header.forEach((th_val) => {
-
-                let elem = $el("th", {
-                    style  : {
-                        "padding"       : ".8em .2em",
-                        "text-align"    : "center",
-                        "border-left"   : (iter_idx !== 0) ? "1px solid black" : "none",
-                        "overflow-wrap" : "break-word",
-                    },
-                    attrib : {
-                        "colspan" : (iter_idx !== max_idx)? (() => {
-                            let colspan = this.NUMBER_OF_UNITS - (this.NUMBER_OF_UNITS) - (header.length - 1);
-
-                            if (colspan <= 0)
-                                return "1";
-
-                            return colspan;
-                        })()
-                        : 
-                        (() => {
-                            let colspan = (this.NUMBER_OF_UNITS) - (header.length - 1);
-
-                            if (colspan <= 0)
-                                return "1";
-
-                            return colspan;
-                        })()
-                    }
-                });
-
-                elem.innerText = th_val;
-
-                this.COL_HEADER?.appendChild(elem);
-
-                iter_idx++;
-            });
         }
 
         generatexxxx() {
 
-            console.log("Generating...");
-            this.PARENT?.prepend(this.PAPER);
+            let hasPurpose = true;
+
+            this.PAGE_HEAD.forEach((h) => {
+
+                let paper = this.make__Paper();
+                    let table = this.make__Table(h, hasPurpose);
+
+                paper.appendChild(table);
+
+                hasPurpose = false;
+                this.PARENT?.append(paper);
+
+            });
+
 
             let size = [this.PAPER.offsetWidth, this.PAPER.offsetHeight];
 
             let doc = new jspdf.jsPDF({
-                orientation : (this.ORIENTATION === PAPER_ORIENTATION.LANDSCAPE)? "l" : "p",
-                format      : (this.ORIENTATION === PAPER_ORIENTATION.LANDSCAPE)? size.reverse() : size,
+                orientation : this.ORIENTATION,
+                format      : (this.ORIENTATION === "l")? size.reverse() : size,
                 unit        : "px",
             });
             
