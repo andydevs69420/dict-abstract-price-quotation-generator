@@ -9,6 +9,9 @@
 
 (function APQG() {
 
+    // define
+    let _1mm_to_1px = 3.779527559;
+
     // supported paper sizes
     window.PAPER_SIZE = Object.freeze({
         A4    : {_w: 210, _h: 297},
@@ -152,7 +155,8 @@
             instance_no++;
 
             this.LOOKUP_TAG      = "dict-apqg";
-            this.NUMBER_OF_UNITS = 9;
+            this.NUMBER_OF_UNITS = 12;
+            this.PADDING_Y       = 260;
             this.PURPOSE_SLOT_ID = "purpose-slot-value";
 
             this.PARENT      = document.getElementsByTagName(this.LOOKUP_TAG)[instance_no];
@@ -182,13 +186,14 @@
             let paper = $el("section");
                 paper = setStyle(paper, {
                     "display" : "flex",
+                    "position" : "relative",
                     "align-items" : "center",
                     "justify-content" : "center",
                     "margin" : "auto" ,
                     "width"  : this.SIZE._w + "mm",
                     "height" : this.SIZE._h + "mm",
                     "background-color" : "#FFFFFF",
-                    "font-family" : "Calibri, sans-serif",
+                    "font-family" : "Helvetica",
                 });
             
             if (this.ORIENTATION === PAPER_ORIENTATION.LANDSCAPE) {
@@ -236,7 +241,7 @@
                         let th_purpose_label = $el("th", {
                             style : {
                                 "height" : "auto" ,
-                                "padding" : ".5em",
+                                "padding" : "0 .5em 1.2em",
                                 "vertical-align" : "top"
                             },
                             attrib : {
@@ -250,7 +255,7 @@
                         let td_purpose_slot = $el("td", {
                             style  : {
                                 "height" : "auto" ,
-                                "padding" : ".5em",
+                                "padding" : "0 .5em 1.2em",
                                 "vertical-align" : "middle"
                             },
                             attrib : {
@@ -316,17 +321,19 @@
 
                         let th_as_column = $el("th", {
                             style  : {
-                                "padding"       : ".8em .2em",
+                                "padding"       : ".5em .2em",
                                 "text-align"    : "center",
                                 "border-left"   : (iter_idx !== 0) ? "1px solid black" : "none",
                                 "overflow-wrap" : "break-word",
+                                "font-size"     : "10pt",
+                                
                             },
                             attrib : {
                                 "colspan" : colspan[colspan.length - 1]
                             }
                         });
 
-                        th_as_column.innerText = this.truncate__Text(th_val, 40);
+                        th_as_column.innerText = this.truncate__Text(th_val, 100);
 
                         tr_header_group.appendChild(th_as_column);
 
@@ -352,6 +359,8 @@
             if (page_num_in_index.constructor.name !== "Number")
             throw new TypeError("page_num_in_index must be an Number type!, got "+page_num_in_index.constructor.name);
 
+            let overlapped = [];
+
             this.ITEM_ROWS[page_num_in_index].forEach((row) => {
                 let tr_row = $el("tr", {
                     style : {
@@ -365,24 +374,81 @@
                         style  : {
                             "padding"       : ".2em",
                             "text-align"    : "center",
-                            "font-weight"   : "bold",
+                            // "font-weight"   : "bold",
                             "border-left"   : (iter_idx !== 0) ? "1px solid black" : "none",
                             "overflow-wrap" : "break-word",
-                            "font-size" : "14px",
+                            "font-size" : "10pt",
                         },
                         attrib : {
                             "colspan" : this.COLSPANS[page_num_in_index][iter_idx]
                         }
                     });
 
-                    td_as_column.innerText = this.truncate__Text(td_val.toString(), 40);
+                    td_as_column.innerText = this.truncate__Text(td_val.toString(), 100);
 
                     tr_row.appendChild(td_as_column);
+
                     iter_idx++;
                 });
-                
-                table.appendChild(tr_row);
+
+                if (table.parentNode.offsetHeight >= (Math.abs(Math.round(((this.ORIENTATION === "l")? this.SIZE._w : this.SIZE._h)) * _1mm_to_1px) - this.PADDING_Y)) {
+                    overlapped.push(tr_row);
+                } else {
+                    table.appendChild(tr_row);
+                }
+
             });
+
+            return overlapped;
+
+        }
+
+        generate__blank(table ,idx) {
+
+            if (!table instanceof HTMLElement)
+            throw new TypeError("table must be an HTMLElement type!, got "+table.constructor.name);
+
+            if (idx.constructor.name !== "Number")
+            throw new TypeError("idx must be an Number type!, got "+idx.constructor.name);
+           
+            while (table.parentNode.offsetHeight < (Math.abs(Math.round(((this.ORIENTATION === "l")? this.SIZE._w : this.SIZE._h)) * _1mm_to_1px) - this.PADDING_Y)) {
+                
+                let empty__tr = $el("tr", {
+                    style : {
+                        "border-bottom" : "1px solid black",
+                    }
+                });
+
+                let iter_idx = 0;
+
+                this.COLSPANS[idx].forEach((colspan) => {
+
+                    let empty__td = $el("td", {
+                        style : {
+                            "padding"       : ".2em",
+                            "text-align"    : "center",
+                            "font-weight"   : "bold",
+                            "border-left"   : (iter_idx !== 0) ? "1px solid black" : "none",
+                            "overflow-wrap" : "break-word",
+                            "font-size" : "10pt",
+                            "color" : "transparent"
+                        },
+                        attrib : {
+                            "colspan" : colspan
+                        }
+                    });
+
+                    empty__td.innerText = "__";
+
+                    empty__tr.appendChild(empty__td);
+
+                    iter_idx++;
+
+                });
+
+                table.appendChild(empty__tr);
+
+            }
 
         }
 
@@ -470,8 +536,6 @@
                     return header.includes(e);
                 }).map((s) => this.HEADERLST.map((h) => h[1]).indexOf(s));
 
-                console.log(page_supplier_indexes);
-
                 let supplier_copy = this.SUPPLIERS.map((supp) => supp);
                 let required_head_indexes = this.HEADERLST.map((h) => h[1]).filter((e) => !supplier_copy.includes(e)).map((rh) => this.HEADERLST.map((hl) => hl[1]).indexOf(rh));
 
@@ -497,10 +561,12 @@
 
         }
 
-        generatexxxx() {
+        async generatexxxx() {
 
             if (!this.HEADERLST)
             throw new Error("Column header must be set before generating!");
+
+            let page_count = 1;
 
             let PAPER__WRAPPER = $el("div", {
                     style : {
@@ -513,11 +579,77 @@
             if (this.PAGE_HEAD.length === 1) {
 
                 let paper = this.make__Paper();
-                    let wrapper = $el("div");
-                        let table = this.make__Table(this.PAGE_HEAD[0], true);
-                    wrapper.appendChild(table);
-                paper.appendChild(wrapper);
                 PAPER__WRAPPER?.appendChild(paper);
+                
+                let page_numbering = $el("span", {
+                    style : {
+                        "position" : "absolute",
+                        "left" : "50%",
+                        "bottom" : "15px",
+                        "transform" : "translateX(-50%)"
+                    }
+                });
+
+                page_numbering.innerText = "Page" + page_count;
+                paper.appendChild(page_numbering);
+
+                let wrapper = $el("div");
+                paper.appendChild(wrapper);
+
+                let table = this.make__Table(this.PAGE_HEAD[0], true);
+                wrapper.appendChild(table);
+
+                let overlapped = this.append__Rows(table, 0);
+                this.generate__blank(table, 0);
+
+                while (overlapped.length > 0) {
+
+                    page_count++;
+
+                    let new_page = this.make__Paper();
+                    PAPER__WRAPPER?.appendChild(new_page);
+
+                    let new_page_numbering = $el("span", {
+                        style : {
+                            "position" : "absolute",
+                            "left" : "50%",
+                            "bottom" : "15px",
+                            "transform" : "translateX(-50%)"
+                        }
+                    });
+                    
+                    new_page_numbering.innerText = "Page" + page_count;
+                    new_page.appendChild(new_page_numbering);
+
+                    let new_wrapper = $el("div");
+                    new_page.appendChild(new_wrapper);
+
+                    let new_table = $el("table", {
+                        style : {
+                            "width"  : "90%",
+                            "margin" : "auto",
+                            "border" : "1px solid black",
+                            "border-collapse" : "collapse",
+                            "table-layout" : "fixed",
+                        }
+                    });
+                    new_wrapper.appendChild(new_table);
+
+                    while (overlapped.length > 0) {
+
+                        if (new_table.parentNode.clientHeight >= (Math.abs(Math.round(((this.ORIENTATION === "l")? this.SIZE._w : this.SIZE._h)) * _1mm_to_1px) - this.PADDING_Y)) {
+                            break;
+                        } else {
+                           
+                            new_table.appendChild(overlapped[0]);
+                            overlapped.splice(0, 1);
+
+                        }
+
+                    }
+
+                    this.generate__blank(new_table, 0);
+                }
 
             } else {
 
@@ -527,42 +659,111 @@
                 this.PAGE_HEAD.forEach((h) => {
 
                     let paper = this.make__Paper();
-                        let wrapper = $el("div");
-                            let table = this.make__Table(h, hasPurpose);
-                            this.append__Rows(table, idx);
-                        wrapper.appendChild(table);
+                    PAPER__WRAPPER?.appendChild(paper);
+
+                    let page_numbering = $el("span", {
+                        style : {
+                            "position" : "absolute",
+                            "left" : "50%",
+                            "bottom" : "15px",
+                            "transform" : "translateX(-50%)"
+                        }
+                    });
+
+                    page_numbering.innerText = "Page" + page_count;
+                    paper.appendChild(page_numbering);
+
+                    let wrapper = $el("div");
+                    paper.appendChild(wrapper);
+
+                    let table = this.make__Table(h, hasPurpose);
+                    wrapper.appendChild(table);
+
+                    let overlapped = this.append__Rows(table, idx);
+                    this.generate__blank(table, idx);
+
+                    while (overlapped.length > 0) {
+
+                        page_count++;
+
+                        let new_page = this.make__Paper();
+                        PAPER__WRAPPER?.appendChild(new_page);
+
+                        let new_page_numbering = $el("span", {
+                            style : {
+                                "position" : "absolute",
+                                "left" : "50%",
+                                "bottom" : "15px",
+                                "transform" : "translateX(-50%)"
+                            }
+                        });
+                        
+                        new_page_numbering.innerText = "Page" + page_count;
+                        new_page.appendChild(new_page_numbering);
+
+                        let new_wrapper = $el("div");
+                        new_page.appendChild(new_wrapper);
+
+                        let new_table = $el("table", {
+                            style : {
+                                "width"  : "90%",
+                                "margin" : "auto",
+                                "border" : "1px solid black",
+                                "border-collapse" : "collapse",
+                                "table-layout" : "fixed",
+                            }
+                        });
+                        new_wrapper.appendChild(new_table);
+
+                        while (overlapped.length > 0) {
+
+                            if (new_table.parentNode.clientHeight >= (Math.abs(Math.round(((this.ORIENTATION === "l")? this.SIZE._w : this.SIZE._h)) * _1mm_to_1px) - this.PADDING_Y)) {
+                                break;
+                            } else {
+                               
+                                new_table.appendChild(overlapped[0]);
+                                overlapped.splice(0, 1);
+
+                            }
+
+                        }
+
+                        this.generate__blank(new_table, idx);
+                    }
+
                     idx++;
                     hasPurpose = false;
-                    paper.appendChild(wrapper);
-                    PAPER__WRAPPER?.appendChild(paper);
+
+                    page_count++;
                     
                 });
 
             }
 
+            console.log("Finished!");
+
             let size = [
-                (this.SIZE._w * 3.779527559),
-                (this.SIZE._h * 3.779527559),
+                (this.SIZE._w * _1mm_to_1px),
+                (this.SIZE._h * _1mm_to_1px),
             ];
 
             let docx = new jspdf.jsPDF({
                 orientation : this.ORIENTATION,
                 format      : (this.ORIENTATION === "l")? size.reverse() : size,
                 unit        : "px",
+                userUnit    : 1.0,
+                precision   : 2,
             });
 
             docx.html(PAPER__WRAPPER, {
                 x: 0,
                 y: 0,
+                scale: 1,
                 callback: function (doc) {
                     doc.output("dataurlnewwindow");
                     // doc.save("test.pdf");
                 }
             });
-        }
-
-        getPaper() {
-            return this.PAPER;
         }
 
     }

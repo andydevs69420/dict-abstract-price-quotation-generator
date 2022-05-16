@@ -28,26 +28,38 @@
             orientation : PAPER_ORIENTATION.LANDSCAPE,
         });
 
-        apqg.setPurpose("Lorem ipsum dolor, sit amet consectetur adipisicing elit. Rem, necessitatibus officiis quis quaerat deserunt officia dolores nostrum itaque fuga repellat.");
-        apqg.markAsSupplier(["SUPPLIER 0", "SUPPLIER 1", "SUPPLIER 2", "SUPPLIER 3", "SUPPLIER 4", "SUPPLIER 5", "SUPPLIER 6"]);
+        apqg.setPurpose("FOR REPAIR OF NISSAN PATROL SDF 486");
+        apqg.markAsSupplier(["CHOKOY AUTO SERVICE", "ELIZABETH AUTO REPAIR SHOP", "ANDOY UNDERCHASES"]);
         apqg.setColumnHeader([
-            [0,  "ITEM NO"            ], 
-            [1,  "QTY"                ], 
-            [2,  "UNIT"               ], 
-            [3,  "ARTICLE / SERVICES" ], 
-            [4,  "SUPPLIER 0"         ],
-            [5,  "SUPPLIER 1"         ],
-            [6,  "SUPPLIER 2"         ],
-            [7,  "SUPPLIER 3"         ],
-            [8,  "SUPPLIER 4"         ],
-            [9,  "SUPPLIER 5"         ],
-            [10, "SUPPLIER 6"         ],
-            [11, "TOTAL"              ],
+            [0,  "ITEM NO"                           ],
+            [1,  "QTY"                               ],
+            [2,  "UNIT"                              ],
+            [3,  "ARTICLE / SERVICES OFFERED BY SHOP"],
+            [4,  "CHOKOY AUTO SERVICE"               ],
+            [5,  "ELIZABETH AUTO REPAIR SHOP"        ],
+            [6,  "ANDOY UNDERCHASES"                 ],
+            [11, "TOTAL"                             ],
+            [12 , ""                                 ]
         ]);
 
-        // apqg.addRow([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
-        for (let i = 1; i < 10; i++)
-            apqg.addRow([1*i, 2*i, 3*i, 4*i, "SUPPLY 0", "SUPPLY 1", "SUPPLY 2", "SUPPLY 3", "SUPPLY 4", "SUPPLY 5", "SUPPLY 6", 12*i]);
+        apqg.addRow(["", 1, "LOT", "Labor and materials for the repair and replacement of the following", "85,000.00", "150,000.00", "89,000.00", "85,000.00", "CHOKOY AUTO SERVICE"]);
+        
+        apqg.addRow(["", "", "", "Engine Support left", "", "", "", "", ""]);
+        apqg.addRow(["", "", "", "Engine Support right", "", "", "", "", ""]);
+        apqg.addRow(["", "", "", "Transmission support", "", "", "", "", ""]);
+        apqg.addRow(["", "", "", "Stabilizer Bushing front and rear", "", "", "", "", ""]);
+        apqg.addRow(["", "", "", "Link Shaft bushing rear", "", "", "", "", ""]);
+        apqg.addRow(["", "", "", "Link Shaft bushing front", "", "", "", "", ""]);
+        apqg.addRow(["", "", "", "Shock Absorber front", "", "", "", "", ""]);
+        apqg.addRow(["", "", "", "Steering Dumper Front", "", "", "", "", ""]);
+        apqg.addRow(["", "", "", "Propeller shaft universal joint", "", "", "", "", ""]);
+        apqg.addRow(["", "", "", "Front pads", "", "", "", "", ""]);
+        apqg.addRow(["", "", "", "Rear brake Shoe", "", "", "", "", ""]);
+        apqg.addRow(["", "", "", "Front hub Bearing left and right", "", "", "", "", ""]);
+        apqg.addRow(["", "", "", "Hand brake cable", "", "", "", "", ""]);
+        apqg.addRow(["", "", "", "Clutch lining and pressure", "", "", "", "85,000.00", ""]);
+        apqg.addRow(["", "", "", "x-x-x-x-x NOTHING FOLLOWS x-x-x-x-x", "", "", "", "x-x-x-x-x-x", ""]);
+
 
         apqg.generatexxxx();
         
